@@ -1,2 +1,2 @@
 # knowledge_card_app
-知识卡片
+小朋友知识卡片
