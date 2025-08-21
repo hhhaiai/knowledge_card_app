@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小朋友知识卡片</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app">
+        <!-- 头部 -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📚</div>
+                <div class="logo-text">
+                    <h1>小朋友知识卡片</h1>
+                    <p>用自然语言学习新知识，创造专属学习卡片！</p>
+                </div>
+            </div>
+            <button class="settings-btn" onclick="openSettings()">
+                <i class="fas fa-cog"></i> 设置
+            </button>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="main-content">
+            <!-- 左侧输入区域 -->
+            <div class="left-panel">
+                <div class="input-section">
+                    <div class="question-input">
+                        <div class="input-header">
+                            <i class="fas fa-lightbulb"></i>
+                            <span>你想学什么知识呢？</span>
+                        </div>
+                        <p class="input-desc">告诉我你想了解的任何知识，我会为你制作一张有趣的学习卡片！</p>
+                        <textarea id="questionInput" placeholder="例如：恐龙为什么会灭绝？"></textarea>
+                        
+                        <div class="model-selector">
+                            <label>选择AI模型</label>
+                            <select id="modelSelect">
+                                <option value="gemini-1.5-flash">Gemini 1.5 Flash (快速响应)</option>
+                                <option value="gemini-2.0-flash" selected>Gemini 2.0 Flash (推荐)</option>
+                                <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (实验版)</option>
+                                <option value="gemini-2.5-flash">Gemini 2.5 Flash (最新)</option>
+                                <option value="gemini-2.5-pro">Gemini 2.5 Pro (专业版)</option>
+                            </select>
+                        </div>
+                        
+                        <button id="generateBtn" class="generate-btn">
+                            <i class="fas fa-magic"></i> 制作知识卡片
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 示例问题 -->
+                <div class="examples-section">
+                    <div class="examples-header">
+                        <i class="fas fa-star"></i>
+                        <span>推荐知识主题</span>
+                    </div>
+                    <div class="example-tags">
+                        <span class="tag" onclick="setQuestion('恐龙为什么会灭绝？')">恐龙为什么会灭绝？</span>
+                        <span class="tag" onclick="setQuestion('太阳系有哪些行星？')">太阳系有哪些行星？</span>
+                        <span class="tag" onclick="setQuestion('海洋动物有什么特点？')">海洋动物有什么特点？</span>
+                        <span class="tag" onclick="setQuestion('植物是怎么生长的？')">植物是怎么生长的？</span>
+                        <span class="tag" onclick="setQuestion('天空为什么是蓝色的？')">天空为什么是蓝色的？</span>
+                        <span class="tag" onclick="setQuestion('为什么会有四季变化？')">为什么会有四季变化？</span>
+                        <span class="tag orange" onclick="setQuestion('科学实验')">科学实验</span>
+                        <span class="tag blue" onclick="setQuestion('数学趣题')">数学趣题</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧卡片展示区域 -->
+            <div class="right-panel">
+                <div class="card-header">
+                    <h2>知识卡片预览</h2>
+                    <div class="card-actions" id="cardActions" style="display: none;">
+                        <button onclick="regenerateCard()" class="action-btn">
+                            <i class="fas fa-redo"></i> 重新生成
+                        </button>
+                        <button onclick="downloadPNG()" class="action-btn">
+                            <i class="fas fa-download"></i> 下载PNG
+                        </button>
+                        <button onclick="downloadHTML()" class="action-btn">
+                            <i class="fas fa-code"></i> 下载HTML
+                        </button>
+                        <button onclick="shareCard()" class="action-btn">
+                            <i class="fas fa-share-alt"></i> 分享
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card-container" id="cardContainer">
+                    <div class="empty-state">
+                        <div class="empty-icon">📝</div>
+                        <p>在左侧输入你感兴趣的问题，开始制作专属知识卡片吧！</p>
+                    </div>
+                </div>
+
+                <!-- 加载状态 -->
+                <div class="loading-state" id="loadingState" style="display: none;">
+                    <div class="loading-animation">
+                        <div class="loading-spinner"></div>
+                        <div class="loading-text">
+                            <h3>正在制作知识卡片...</h3>
+                            <p>AI正在整理知识，马上就好！</p>
+                            <div class="loading-progress">
+                                <div class="progress-bar"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 设置弹窗 -->
+    <div class="modal" id="settingsModal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-cog"></i> 设置</h3>
+                <button class="close-btn" onclick="closeSettings()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-section">
+                    <h4><i class="fas fa-robot"></i> AI模型配置</h4>
+                    <div class="setting-item">
+                        <label>默认模型</label>
+                        <select id="settingsModelSelect" style="width: 100%; padding: 0.625rem; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 0.5rem; font-size: 0.875rem;">
+                            <option value="gemini-1.5-flash">Gemini 1.5 Flash (快速响应)</option>
+                            <option value="gemini-2.0-flash">Gemini 2.0 Flash (推荐)</option>
+                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash (实验版)</option>
+                            <option value="gemini-2.5-flash">Gemini 2.5 Flash (最新)</option>
+                            <option value="gemini-2.5-pro">Gemini 2.5 Pro (专业版)</option>
+                        </select>
+                        <p class="setting-desc">选择默认使用的AI模型</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>API密钥 (必需)</label>
+                        <input type="password" id="apiKeyInput" placeholder="输入你的Gemini API密钥">
+                        <button class="test-btn" onclick="testApiKey()">测试</button>
+                    </div>
+                    <p class="api-help">需要Gemini API密钥，可从Google AI Studio获取</p>
+                </div>
+
+                <div class="setting-section">
+                    <h4><i class="fas fa-sliders-h"></i> 偏好设置</h4>
+                    <div class="setting-toggle">
+                        <div>
+                            <label>自动保存卡片</label>
+                            <p class="setting-desc">自动保存生成的卡片</p>
+                        </div>
+                        <input type="checkbox" id="autoSave" checked>
+                    </div>
+                    <div class="setting-toggle">
+                        <div>
+                            <label>显示生成过程</label>
+                            <p class="setting-desc">显示AI的思考过程</p>
+                        </div>
+                        <input type="checkbox" id="showProcess">
+                    </div>
+                    <div class="setting-toggle">
+                        <div>
+                            <label>简化语言</label>
+                            <p class="setting-desc">使用更简单的词汇解释</p>
+                        </div>
+                        <input type="checkbox" id="simpleMode" checked>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="save-btn" onclick="saveSettings()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
